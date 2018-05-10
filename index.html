@@ -42,19 +42,20 @@ var mSensorDataURL = 'http://80.69.174.27:8080/output/';
 
 // A subscriber's key (other keys are available at http://80.69.174.27:8080/streams/)
 sensor.key = "GqXO9z3ae9tODKPPPO2YHxw39By";
+sensor.key2 = "dPjyGN0bx0IDgO000D4lI6leJGK";
 
 // A bitmap image describing where the sensor is located
 sensor.image = "https://evothings.com/demos/dome_pics/IMG_1758.JPG";
 
 
 // Function to retrieve data, placing it in a "response" object
-function getJSON() 
+function getJSON(key) 
     {
     if (window.cordova) 
         {
             console.log('Using Apache Cordova HTTP GET function');
             cordovaHTTP.get(
-                mSensorDataURL + sensor.key + '.json?gt[timestamp]=now-1day&page=1',
+                mSensorDataURL + key + '.json?gt[timestamp]=now-1day&page=1',
                 function (response) 
                     {
                         if (response) 
@@ -104,27 +105,48 @@ function printData()
                  + '<br /><div id="time">Time  ' + sensor.data.timestamp + '</div>'
                  + '<div id="hum">Humidity ' + sensor.data.h + ' % (rel)</div>'
                  + '<div id="temp">Temperature ' + sensor.data.t + ' celcius</div>'
-                 + '<img src="' + sensor.image + '" />'
             } 
     else 
             {
                 html = '<h1>Sensor Data</h1>'
                  + '<br />Sorry, sensor data not available right now :(</br>'
-                 + '<img src="' + sensor.image + '" />'
             }
-    document.getElementById("printHere").innerHTML= html;
+
+    html2 = '<canvas id="myChart"></canvas>'
+    document.getElementById("printHere").innerHTML= html2;
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: 'bar',
+
+    // The data for our dataset
+    data: {
+        labels: ["Office", "Recreational space"],
+        datasets: [{
+            label: "Temperature",
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: [sensor.data.t, 45],
+        }]
+    },
+
+    // Configuration options go here
+    options: {}
+});
     }
 
 
 </script>
 
-<button onClick="getJSON();">Click to recieve sensor data</button>
+<button onClick="getJSON(sensor.key2);">Click to recieve sensor data</button>
 <div id="printHere"></div>
 
 	<script src="cordova.js"></script>
 	<script src="libs/evothings/evothings.js"></script>
 	<script src="libs/evothings/ui/ui.js"></script>
-	<!-- TODO: Add libraries that you need -->
+    <!-- TODO: Add libraries that you need -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 
 </body>
 
