@@ -74,7 +74,7 @@ function getJSON(key)
         {
             console.log('Not using Cordova, fallback to AJAX via jquery');
             $.ajax({
-                    url: mSensorDataURL + sensor.key + ".json?gt[timestamp]=now-1day",
+                    url: mSensorDataURL + key + ".json?gt[timestamp]=now-1day",
                     jsonp: "callback",
                     cache: true,
                     dataType: "jsonp",
