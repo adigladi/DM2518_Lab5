@@ -36,33 +36,50 @@
 
 // Create an empty sensor object as a global 
 var sensor = {};
+var sensor2 = {};
 
 // Where the sensor data is stored
 var mSensorDataURL = 'http://80.69.174.27:8080/output/';
 
 // A subscriber's key (other keys are available at http://80.69.174.27:8080/streams/)
 sensor.key = "GqXO9z3ae9tODKPPPO2YHxw39By";
-sensor.key2 = "dPjyGN0bx0IDgO000D4lI6leJGK";
+sensor2.key = "dPjyGN0bx0IDgO000D4lI6leJGK";
 
 // A bitmap image describing where the sensor is located
 sensor.image = "https://evothings.com/demos/dome_pics/IMG_1758.JPG";
 
 
 // Function to retrieve data, placing it in a "response" object
-function getJSON(key) 
+function getJSON() 
     {
     if (window.cordova) 
         {
             console.log('Using Apache Cordova HTTP GET function');
             cordovaHTTP.get(
-                mSensorDataURL + key + '.json?gt[timestamp]=now-1day&page=1',
+                mSensorDataURL + sensor.key + '.json?gt[timestamp]=now-1day&page=1',
                 function (response) 
                     {
                         if (response) 
                             {
                                 sensor.data = JSON.parse(response.data)[0];
                                 sensor.fullData = JSON.parse(response.data);
-                                printData();
+                                //Second call
+                                cordovaHTTP.get(
+                                    mSensorDataURL + sensor2.key + '.json?gt[timestamp]=now-1day&page=1',
+                                    function (response) 
+                                        {
+                                            if (response) 
+                                                {
+                                                    sensor2.data = JSON.parse(response.data)[0];
+                                                    sensor2.fullData = JSON.parse(response.data);
+                                                    printData();
+                                                }
+                                        },
+                                    function (error) 
+                                        {
+                                        console.log(JSON.stringify(error));
+                                        });
+                                //End of second call
                             }
                     },
                 function (error) 
@@ -88,7 +105,6 @@ function getJSON(key)
                                 {
                                     sensor.data = response[0];
                                     sensor.fullData = response;
-                                    printData();
                                 }
                         }
                 });
@@ -98,7 +114,7 @@ function getJSON(key)
 
 function printData()    
     {
-        if (sensor && sensor.data) 
+        if (sensor && sensor.data && sensor2 && sensor2.data) 
             {
             // Display the info.
                 html = '<h1>Sensor Data</h1>'
@@ -127,7 +143,7 @@ function printData()
             label: "Temperature",
             backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
-            data: [sensor.data.t, 45],
+            data: [sensor.data.t, sensor2.data.t],
         }]
     },
 
@@ -136,10 +152,13 @@ function printData()
 });
     }
 
+function main() {
+    getJSON();    
+}
 
 </script>
 
-<button onClick="getJSON(sensor.key2);">Click to recieve sensor data</button>
+<button onClick="getJSON();">Click to recieve sensor data</button>
 <div id="printHere"></div>
 
 	<script src="cordova.js"></script>
