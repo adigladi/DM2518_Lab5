@@ -50,13 +50,13 @@ sensor.image = "https://evothings.com/demos/dome_pics/IMG_1758.JPG";
 
 
 // Function to retrieve data, placing it in a "response" object
-function getJSON() 
+function getJSON(num, num2) 
     {
     if (window.cordova) 
         {
             console.log('Using Apache Cordova HTTP GET function');
             cordovaHTTP.get(
-                mSensorDataURL + sensor.key + '.json?gt[timestamp]=now-1day&page=1',
+                mSensorDataURL + sensor.key + '.json?gt[timestamp]=now-' + num + 'day&lt[timestamp]=now-' + num2,
                 function (response) 
                     {
                         if (response) 
@@ -65,7 +65,7 @@ function getJSON()
                                 sensor.fullData = JSON.parse(response.data);
                                 //Second call
                                 cordovaHTTP.get(
-                                    mSensorDataURL + sensor2.key + '.json?gt[timestamp]=now-1day&page=1',
+                                    mSensorDataURL + sensor2.key + '.json?gt[timestamp]=now-' + num + 'day&lt[timestamp]=now-' + num2,
                                     function (response) 
                                         {
                                             if (response) 
@@ -116,20 +116,12 @@ function printData()
     {
         if (sensor && sensor.data && sensor2 && sensor2.data) 
             {
-            // Display the info.
-                html = '<h1>Sensor Data</h1>'
-                 + '<br /><div id="time">Time  ' + sensor.data.timestamp + '</div>'
-                 + '<div id="hum">Humidity ' + sensor.data.h + ' % (rel)</div>'
-                 + '<div id="temp">Temperature ' + sensor.data.t + ' celcius</div>'
+                var office = getMean(sensor.fullData);
+                var recreational = getMean(sensor2.fullData);
             } 
-    else 
-            {
-                html = '<h1>Sensor Data</h1>'
-                 + '<br />Sorry, sensor data not available right now :(</br>'
-            }
 
-    html2 = '<canvas id="myChart"></canvas>'
-    document.getElementById("printHere").innerHTML= html2;
+    html = '<canvas id="myChart"></canvas>'
+    document.getElementById("printHere").innerHTML= html;
 
     var ctx = document.getElementById('myChart').getContext('2d');
     var chart = new Chart(ctx, {
@@ -143,23 +135,56 @@ function printData()
             label: "Temperature",
             backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
-            data: [sensor.data.t, sensor2.data.t],
+            data: [office, recreational],
         }]
     },
 
     // Configuration options go here
-    options: {}
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    suggestedMin: Math.min(office, recreational) - 3,
+                    suggestedMax: Math.max(office, recreational) + 3
+                }
+            }]
+        }
+    }
 });
     }
 
-function main() {
-    getJSON();    
+function getMean(input) {
+    var total = 0;
+    for (var i = 0; i < input.length; i++) {
+        total += parseInt(input[i].t);
+    }
+    if (input.length > 0) {
+        return (Math.round(total/input.length));
+    }
+}
+
+var lower = 0;
+var upper = 1;
+
+function plus() {
+    lower += 1;
+    upper += 1;
+    getJSON(upper, lower);
+    console.log("upper: "+upper+"Loer: "+lower);
+}
+
+function minus() {
+    lower -= 1;
+    upper -= 1;
+    getJSON(upper, lower);
 }
 
 </script>
 
-<button onClick="getJSON();">Click to recieve sensor data</button>
+<button onClick="getJSON(upper, lower);">Click to recieve sensor data</button>
 <div id="printHere"></div>
+<button onClick="plus();">+</button>
+<button onClick="minus();">-</button>
 
 	<script src="cordova.js"></script>
 	<script src="libs/evothings/evothings.js"></script>
