@@ -118,6 +118,8 @@ function printData()
             {
                 var office = getMean(sensor.fullData);
                 var recreational = getMean(sensor2.fullData);
+                var date1 = new Date(Date.parse(sensor.fullData[sensor.fullData.length -1].timestamp));
+                var date2 = new Date(Date.parse(sensor.fullData[0].timestamp));
             } 
 
     html = '<canvas id="myChart"></canvas>'
@@ -132,7 +134,7 @@ function printData()
     data: {
         labels: ["Office", "Recreational space"],
         datasets: [{
-            label: "Temperature",
+            label: "Average temperature " + date1 + " - " + date2,
             backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
             data: [office, recreational],
@@ -174,8 +176,10 @@ function plus() {
 }
 
 function minus() {
-    lower -= 1;
-    upper -= 1;
+    if (upper > 1 && lower > 0) {
+        lower -= 1;
+        upper -= 1;
+    }
     getJSON(upper, lower);
 }
 
