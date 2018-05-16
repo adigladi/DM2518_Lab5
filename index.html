@@ -55,8 +55,9 @@ function getJSON(num, num2)
     if (window.cordova) 
         {
             console.log('Using Apache Cordova HTTP GET function');
+            console.log(mSensorDataURL + sensor.key + '.json?gt[timestamp]=now-' + num + 'day&lt[timestamp]=now-' + num2 + 'day&limit=360');
             cordovaHTTP.get(
-                mSensorDataURL + sensor.key + '.json?gt[timestamp]=now-' + num + 'day&lt[timestamp]=now-' + num2,
+                mSensorDataURL + sensor.key + '.json?gt[timestamp]=now-' + num + 'day&lt[timestamp]=now-' + num2 + 'day&limit=360',
                 function (response) 
                     {
                         if (response) 
@@ -65,7 +66,7 @@ function getJSON(num, num2)
                                 sensor.fullData = JSON.parse(response.data);
                                 //Second call
                                 cordovaHTTP.get(
-                                    mSensorDataURL + sensor2.key + '.json?gt[timestamp]=now-' + num + 'day&lt[timestamp]=now-' + num2,
+                                    mSensorDataURL + sensor2.key + '.json?gt[timestamp]=now-' + num + 'day&lt[timestamp]=now-' + num2 + 'day&limit=360',
                                     function (response) 
                                         {
                                             if (response) 
@@ -73,6 +74,7 @@ function getJSON(num, num2)
                                                     sensor2.data = JSON.parse(response.data)[0];
                                                     sensor2.fullData = JSON.parse(response.data);
                                                     printData();
+                                                    console.log("printed");
                                                 }
                                         },
                                     function (error) 
@@ -120,6 +122,9 @@ function printData()
                 var recreational = getMean(sensor2.fullData);
                 var date1 = new Date(Date.parse(sensor.fullData[sensor.fullData.length -1].timestamp));
                 var date2 = new Date(Date.parse(sensor.fullData[0].timestamp));
+                var formattedDate1 = date1.getUTCFullYear() + "/" + date1.getUTCMonth() + "/" + date1.getUTCDate();
+                var month = parseInt(date2.getUTCMonth()) + 1;
+                var formattedDate2 = date2.getUTCFullYear() + "/" + month + "/" + date2.getUTCDate();
             } 
 
     html = '<canvas id="myChart"></canvas>'
@@ -134,7 +139,7 @@ function printData()
     data: {
         labels: ["Office", "Recreational space"],
         datasets: [{
-            label: "Average temperature " + date1 + " - " + date2,
+            label: "Average temperature the last 10 minutes of " + formattedDate2,
             backgroundColor: 'rgb(255, 99, 132)',
             borderColor: 'rgb(255, 99, 132)',
             data: [office, recreational],
@@ -172,7 +177,7 @@ function plus() {
     lower += 1;
     upper += 1;
     getJSON(upper, lower);
-    console.log("upper: "+upper+"Loer: "+lower);
+    console.log("upper: " + upper + "Lower: " + lower);
 }
 
 function minus() {
@@ -187,8 +192,8 @@ function minus() {
 
 <button onClick="getJSON(upper, lower);">Click to recieve sensor data</button>
 <div id="printHere"></div>
-<button onClick="plus();">+</button>
-<button onClick="minus();">-</button>
+<button onClick="plus();">Back 1 day</button>
+<button onClick="minus();">Forward 1 day</button>
 
 	<script src="cordova.js"></script>
 	<script src="libs/evothings/evothings.js"></script>
